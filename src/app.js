@@ -4,8 +4,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = (event, context, callback) => {
 
-    console.log("hallo");
-
+    console.info("EVENT\n" + JSON.stringify(event, null, 2));
     event.Records.forEach(function (record) {
         //Build the S3 Params string.  Watch out here because we're assuming only 1 record per trigger
         let s3Params = {
@@ -19,19 +18,27 @@ exports.handler = (event, context, callback) => {
             Item: {}
         };
 
+
+        console.info("s3Params\n" + JSON.stringify(s3Params, null, 2));
+        console.info("dynParams\n" + JSON.stringify(dynParams, null, 2));
+
+
         s3.getObject(s3Params, function (err, data) {
             if (err) {
+                console.error("ERROR\n" + JSON.stringify(err, null, 2));
                 callback(err);
             } else {
                 let dynamoData = data.Body.toString().split('|');
 
                 dynamoData.pop(); //get rid of the last entry of the array because its empty
-
+                console.info("dynamoData\n" + dynamoData);
                 dynamoData.forEach(function (row) {
                     dynParams.Item = JSON.parse(row);
                     docClient.put(dynParams, function (err, data) {
-                        if (err) callback(err);
-                        else callback(null, data);
+                        if (err) {
+                            console.error("ERROR\n" + JSON.stringify(err, null, 2));
+                            callback(err);
+                        } else callback(null, data);
                     });
 
                 });

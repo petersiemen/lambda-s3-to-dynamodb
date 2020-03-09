@@ -2,10 +2,21 @@
 
 const app = require('../../app.js');
 const chai = require('chai');
+const fs = require('fs');
 const expect = chai.expect;
 var event, context;
 
+
 describe('Tests index', function () {
+    var event;
+    before(function(done){
+    fs.readFile(process.cwd() +'/../events/event.json', 'utf8', function(err, fileContents) {
+      if (err) throw err;
+      event = JSON.parse(fileContents);
+      done();
+    });
+    });
+
     it('verifies successful response', async () => {
         const result = await app.handler(event, context);
 
@@ -19,4 +30,10 @@ describe('Tests index', function () {
         expect(response.message).to.be.equal("hello world");
         // expect(response.location).to.be.an("string");
     });
+
+    it('iterates through an array with one element', async () => {
+
+        event.Records.forEach(console.log)
+
+    })
 });
